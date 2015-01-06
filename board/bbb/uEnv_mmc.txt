@@ -1,0 +1,69 @@
+#
+# UENV BeagleBone
+#
+
+serverip=192.168.111.15
+ipaddr=192.168.111.25
+netmask=255.255.255.0
+hostname=BBB
+gatewayip=192.168.111.15
+
+optargs=debug systemd.log_level=warning
+kernel_file=uImage
+console=ttyO0,115200n8
+
+setip=set bootargs ${bootargs} ip=${ipaddr}:${serverip}:${gatewayip}:${netmask}:${hostname}::off
+
+
+###
+# TFTP transfers
+###
+fdtfile_tftp=am335x-boneblack.dtb
+loadKernel_tftp=tftp ${loadaddr} ${kernel_file}
+loadfdt_tftp=tftp ${fdtaddr} ${fdtfile_tftp}
+
+
+###
+# TFTP Kernel and rootfs
+#ramargs=setenv bootargs console=${console} ${optargs} root=${ramroot} rootfstype=${ramrootfstype}
+ramboot=echo Booting from ramdisk ...; run ramargs; run setip ; bootm ${loadaddr} ${rdaddr} ${fdtaddr}
+ramroot=/dev/ram0 rw ramdisk_size=65536 initrd=${rdaddr},64M
+ramrootfstype=ext2
+rdaddr=0x81000000
+###
+loadKernel_tftp_uImage=tftp ${loadaddr} uImage
+loadrd_tftp=tftp ${rdaddr} rootfs.cpio.uboot
+tftp_banner=echo "-- TFTP-RAM-Boot --"; echo $loadKernel_tftp;  echo $loadfdt_tftp ;  echo $loadrd_tftp ; echo $static_ip ; echo $ramboot
+tftp_boot=run loadKernel_tftp_uImage; run loadfdt_tftp; run loadrd_tftp; run ramargs; echo " ---- READY ----- " ; run ramboot
+
+
+###
+# Setup for NFS
+###
+nfs_export=/srv/nfsroot
+nfs_rootfs=/dev/nfs rw
+nfs_netargs=setenv nfs_rootfsargs nfsroot=${serverip}:${nfs_export} ip=${ipaddr}:::::eth0
+nfs_bootargs=setenv bootargs console=${console} root=${nfs_rootfs} ${nfs_rootfsargs} ${optargs}
+nfs_banner=echo "--- NFS Boot ---"
+nfs_boot=run loadKernel_tftp; run loadfdt_tftp; run nfs_netargs; run nfs_bootargs ; bootz ${loadaddr} - ${fdtaddr}
+
+###
+# Setup for booting from MMC
+###
+bootdir=/boot
+mmcdev=0
+mmcpart=1
+loadzimage=load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${kernel_file}
+mmc_loadfdt=load mmc ${mmcdev}:${mmcpart} ${fdtaddr} ${fdtfile}
+mmc_rootfs=/dev/mmcblk0p2 ro
+mmc_banner=echo "--- MMC Boot ---"
+mmc_rootfsargs='rootfstype=ext4 rootwait fixrtc'
+mmc_bootargs=setenv bootargs console=${console} root=${mmc_rootfs} ${mmc_rootfsargs} ${optargs}
+mmc_boot=run loadzimage; run mmc_loadfdt; run mmc_bootargs; bootz ${loadaddr} - ${fdtaddr}
+
+
+## Kernel via TFTP, rootfs from NFS
+#uenvcmd=sleep 3; run nfs_banner ; run nfs_boot
+uenvcmd=sleep 3; run tftp_banner ; run tftp_boot
+
+# uenvcmd=sleep 3; run mmc_banner ; run mmc_boot

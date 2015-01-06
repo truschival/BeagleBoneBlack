@@ -1,0 +1,35 @@
+config BR2_PACKAGE_TRANSMOGRIFY
+       bool "Transmogrify Client"
+	   depends on BR2_PACKAGE_LIBTRANSMOG
+	   help
+		Program using libtransmogrify
+
+if BR2_PACKAGE_TRANSMOGRIFY
+
+config BR2_PACKAGE_TRANSMOGRIFY_SRC
+	  bool "Build from source" if !SRC_BIN_DOWNLOAD_SRC
+	  depends on !SRC_BIN_DOWNLOAD_BIN_ONLY
+	  help
+		Say yes here if you want to rebuild the package
+
+
+### Version selection
+choice
+	prompt "Package Version"
+
+config BR2_PACKAGE_TRANSMOGRIFY_STABLE
+   bool "master"
+   help
+   Stable branch
+
+config BR2_PACKAGE_TRANSMOGRIFY_DEVEL
+   bool "develop"
+   default false
+   help
+   Bleeding edge features
+
+endchoice
+
+
+
+endif #package

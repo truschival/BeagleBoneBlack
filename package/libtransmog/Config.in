@@ -1,0 +1,61 @@
+config BR2_PACKAGE_LIBTRANSMOG
+       bool "Libtransmog"
+       help
+       Highly optimized transmogrification library
+
+if BR2_PACKAGE_LIBTRANSMOG
+
+config BR2_PACKAGE_LIBTRANSMOG_SRC
+       bool "Build from source" if !SRC_BIN_DOWNLOAD_SRC
+       depends on !SRC_BIN_DOWNLOAD_BIN_ONLY
+       help
+       Say yes here if you want to rebuild the package
+
+
+config BR2_PACKAGE_LIBTRANSMOG_MAGIC_MOJO
+	   int
+	   prompt "Magic transmogrification mojo"
+	   depends on BR2_PACKAGE_LIBTRANSMOG_SRC
+	   default 13
+	   help
+	   Magic number to alter the transmogrification result
+
+
+### Version selection
+choice
+   prompt "Package Version"
+
+config BR2_PACKAGE_LIBTRANSMOG_VERSION_STABLE
+       bool "master"
+       help
+       Stable branch
+
+config BR2_PACKAGE_LIBTRANSMOG_VERSION_DEVEL
+   bool "develop"
+   help
+   Bleeding edge features
+
+
+config BR2_PACKAGE_LIBTRANSMOG_VERSION_CUSTOM
+   bool "custom"
+   help
+   Bleeding edge features
+
+endchoice
+
+
+if BR2_PACKAGE_LIBTRANSMOG_VERSION_CUSTOM
+
+config BR2_PACKAGE_LIBTRANSMOG_VERSION_CUSTOM_STRING
+       string "custom version"
+       help
+       Custom (Git-) revision
+endif
+
+config BR2_PACKAGE_LIBTRANSMOG_VERSION
+       string
+       default "master" if BR2_PACKAGE_LIBTRANSMOG_VERSION_STABLE
+       default "develop" if BR2_PACKAGE_LIBTRANSMOG_VERSION_DEVEL
+       default BR2_PACKAGE_LIBTRANSMOG_VERSION_CUSTOM_STRING  if BR2_PACKAGE_LIBTRANSMOG_VERSION_CUSTOM
+
+endif #package

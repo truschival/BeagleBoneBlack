@@ -1,0 +1,47 @@
+#-------------------------------------------------------------------------------
+menu "Pre-Build Distibution Options"
+
+config SRC_BIN_PRE_BUILT_DIR
+	string "Store Pre-Builts in"
+	default "$(BASE_DIR)/pre-builts"
+	help
+	Output directory for pre-built packag tar balls
+	the default is "$(BASE_DIR)/pre-builts"
+
+choice
+	prompt"Select default distribuiton"
+	default SRC_BIN_CHOOSE_SOURCE_FORMAT
+	help
+	Select default source format for packages
+
+config SRC_BIN_DOWNLOAD_SRC
+	bool "Build Sources"
+	help
+		Build and install all packages from source.
+
+config SRC_BIN_DOWNLOAD_BIN_ONLY
+	bool "Download binaries only"
+	help
+	Download all custom packages as binary
+
+config SRC_BIN_CHOOSE_SOURCE_FORMAT
+	bool "Choose for each package"
+	help
+	Choose packages individually
+	This is the default behavior.
+
+endchoice
+
+endmenu # Source-Bin
+
+#-------------------------------------------------------------------------------
+
+menu "Transmogrification Tools"
+	comment "Simple demo packages"
+	source "$BR2_EXTERNAL/package/transmogrify/Config.in"
+
+	comment "Transmogclient depends on Libtransmog"
+	source "$BR2_EXTERNAL/package/libtransmog/Config.in"
+endmenu
+
+#-------------------------------------------------------------------------------
